@@ -3,7 +3,8 @@
 namespace Botble\EdnElection\Tables;
 
 use Botble\EdnElection\Models\Candidate;
-use Botble\Table\Abstracts\TableAbstract;
+// Change from TableAbstract to BaseTable
+use Botble\EdnElection\Tables\BaseTable;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\HeaderActions\CreateHeaderAction;
@@ -11,8 +12,9 @@ use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\NameColumn;
 use Botble\Table\Columns\Column;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 
-class CandidateTable extends TableAbstract
+class CandidateTable extends BaseTable
 {
     public function setup(): void
     {
@@ -20,13 +22,16 @@ class CandidateTable extends TableAbstract
             ->model(Candidate::class)
             ->addColumns([
                 IdColumn::make(),
-                Column::make('image')->title('Photo')->width(70),
+                Column::make('image')
+                    ->title('Photo')
+                    ->width(70)
+                    ->searchable(false)
+                    ->orderable(false),
                 NameColumn::make()->route('election.candidates.edit'),
                 Column::make('party_name')
                     ->title('Party')
                     ->alignLeft()
                     ->orderable(false),
-                // Safe Woredas column
                 Column::make('woredas_list')
                     ->title('Woredas')
                     ->alignLeft()
@@ -38,13 +43,28 @@ class CandidateTable extends TableAbstract
                 EditAction::make()->route('election.candidates.edit'),
                 DeleteAction::make()->route('election.candidates.destroy'),
             ]);
+
+        // Centralized helpers from BaseTable
+        $this->addImportExportButtons('candidates');
+        $this->injectImportAssets('edn.election.import.preview');
     }
 
-    public function ajax(): \Illuminate\Http\JsonResponse
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
-            // Use editColumn to map the woredas names into a simple string
+            // Handle Photo rendering
+            ->editColumn('image', function (Candidate $item) {
+                if (!$item->image) {
+                    return null;
+                }
+                return sprintf(
+                    '<img src="%s" width="40" alt="%s" class="img-thumbnail" />',
+                    \RvMedia::getImageUrl($item->image, 'thumb'),
+                    $item->name
+                );
+            })
+            // Map the woredas names into a simple string
             ->editColumn('woredas_list', function (Candidate $item) {
                 return $item->woredas->pluck('name')->implode(', ');
             });
@@ -54,7 +74,6 @@ class CandidateTable extends TableAbstract
 
     public function query(): Builder
     {
-        // Using your exact working query with with('woredas') added
         return $this->getModel()->query()
             ->select([
                 'edn_candidates.id',

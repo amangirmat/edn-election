@@ -9,6 +9,8 @@ use Botble\EdnElection\Forms\WoredaForm;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Forms\FormBuilder;
 use Illuminate\Http\Request;
+use Botble\EdnElection\Traits\HasImportExport;
+
 
 class WoredaController extends BaseController
 {
@@ -49,4 +51,18 @@ class WoredaController extends BaseController
         Woreda::findOrFail($id)->delete();
         return $response->setMessage('Deleted successfully');
     }
+
+
+    use HasImportExport;
+
+public function postImportPreview(Request $request) {
+    // FIX: Changed from performImportSave to performImportPreview
+    return $this->performImportPreview($request, Woreda::class);
+}
+
+public function postImportSave(Request $request) {
+    return $this->performImportSave($request, Woreda::class, ['name', 'zone_id']);
+}
+
+
 }

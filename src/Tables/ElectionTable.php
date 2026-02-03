@@ -3,7 +3,7 @@
 namespace Botble\EdnElection\Tables;
 
 use Botble\EdnElection\Models\Election;
-use Botble\Table\Abstracts\TableAbstract;
+use Botble\EdnElection\Tables\BaseTable; // Changed from TableAbstract
 use Botble\Table\HeaderActions\CreateHeaderAction;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\CreatedAtColumn;
@@ -12,10 +12,11 @@ use Botble\Table\Columns\LinkableColumn;
 use Botble\Table\Columns\FormattedColumn;
 use Illuminate\Database\Eloquent\Builder;
 
-class ElectionTable extends TableAbstract
+class ElectionTable extends BaseTable
 {
     public function setup(): void
     {
+        // Keep your custom logic
         $this->hasActions = false;
         $this->hasOperations = false;
 
@@ -33,7 +34,6 @@ class ElectionTable extends TableAbstract
                     })
                     ->addClass('font-bold text-primary'),
 
-                // 1. Fixed Type Column
                 Column::make('type')
                     ->title('Type')
                     ->alignCenter()
@@ -47,7 +47,6 @@ class ElectionTable extends TableAbstract
                         );
                     }),
 
-                // 2. Fixed Status Column (No more dashes)
                 FormattedColumn::make('status')
                     ->title(trans('core/base::tables.status'))
                     ->alignCenter()
@@ -56,9 +55,8 @@ class ElectionTable extends TableAbstract
                         $item = $column->getItem();
                         if (!$item) return '—';
 
-                        // Manually mapping your status strings to Botble CSS classes
                         $status = $item->status;
-                        $class = 'bg-secondary'; // Default color
+                        $class = 'bg-secondary'; 
 
                         if ($status == 'ongoing') $class = 'bg-success';
                         if ($status == 'draft') $class = 'bg-warning';
@@ -115,6 +113,12 @@ class ElectionTable extends TableAbstract
                 CreatedAtColumn::make(),
             ])
             ->addHeaderAction(CreateHeaderAction::make()->route('election.create'));
+
+        // 1. ADD THE BUTTONS
+        $this->addImportExportButtons('elections');
+
+        // 2. ADD THE ASSETS FOR PREVIEW
+        $this->injectImportAssets('edn.election.import.preview');
     }
 
     public function query(): Builder
@@ -122,8 +126,8 @@ class ElectionTable extends TableAbstract
         return $this->getModel()->query()->select([
             'id',
             'name',
-            'type',   // Must be here
-            'status', // Must be here
+            'type',   
+            'status', 
             'created_at',
         ]);
     }

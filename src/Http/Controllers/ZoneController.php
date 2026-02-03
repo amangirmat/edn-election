@@ -9,12 +9,15 @@ use Botble\EdnElection\Forms\ZoneForm;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Forms\FormBuilder;
 use Illuminate\Http\Request;
+use Botble\EdnElection\Traits\HasImportExport;
+
 
 class ZoneController extends BaseController
 {
     public function index(ZoneTable $table)
     {
         $this->pageTitle('Zones');
+        
         return $table->renderTable();
     }
 
@@ -49,4 +52,20 @@ class ZoneController extends BaseController
         Zone::findOrFail($id)->delete();
         return $response->setMessage('Deleted successfully');
     }
+
+    use HasImportExport;
+
+  // ZoneController.php
+
+public function postImportPreview(Request $request) {
+    // Standardize to array
+    return $this->performImportPreview($request, Zone::class, ['name', 'region_id']);
+}
+
+public function postImportSave(Request $request) {
+    return $this->performImportSave($request, Zone::class, ['name', 'region_id']);
+}
+
+
+
 }

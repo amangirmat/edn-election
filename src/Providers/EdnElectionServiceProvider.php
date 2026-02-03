@@ -18,6 +18,7 @@ class EdnElectionServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        
         $this->setNamespace('plugins/edn-election')
             ->loadAndPublishViews()
             ->loadAndPublishTranslations()
@@ -26,6 +27,7 @@ class EdnElectionServiceProvider extends ServiceProvider
 
                $this->loadViewsFrom(__DIR__ . '/../resources/views', 'edn-election');
 
+               
 
         DashboardMenu::default()->beforeRetrieving(function () {
             DashboardMenu::make()
@@ -120,6 +122,7 @@ class EdnElectionServiceProvider extends ServiceProvider
                 'permissions' => ['election.chambers.index'],         // Permission key
             ]);
         });
+        
 
 // Shortcode registration
     if (class_exists('Botble\Shortcode\Providers\ShortcodeServiceProvider')) {
@@ -395,6 +398,7 @@ $totalWins = array_sum(array_column($partyStats, 'seats'));
         })
         ->select('slugs.key as slug', \DB::raw('SUM(edn_woredas.total_voters) as total'))
         ->groupBy('slug')->pluck('total', 'slug');
+        
 
     // --- 6. View Resolution ---
     $headerStyle = $shortcode->header_style ?: 'default';

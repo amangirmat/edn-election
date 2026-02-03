@@ -10,6 +10,9 @@ use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Forms\FormBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+use Botble\EdnElection\Traits\HasImportExport;
 
 class RegionController extends BaseController
 {
@@ -89,5 +92,18 @@ class RegionController extends BaseController
             ]);
         }
     }
+}
+// C:\xampp\htdocs\DailyNews\platform\plugins\edn-election\src\Http\Controllers\RegionController.php
+
+use HasImportExport;
+
+public function postImportPreview(Request $request) {
+    // FIX: Changed from performImportSave to performImportPreview
+    return $this->performImportPreview($request, Region::class);
+}
+
+public function postImportSave(Request $request) {
+    return $this->performImportSave($request, Region::class, ['name', 'code']);
+
 }
 }
